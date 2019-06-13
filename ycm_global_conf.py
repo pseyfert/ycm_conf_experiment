@@ -256,16 +256,30 @@ def FlagsForFile(filename):
 
     #  BODGING until it works ...
 
-    flags += [b"-nostdinc"]
+    # LXPLUS
+    # flags += [b"-nostdinc"]
 
-    flags += [b"-isystem", b"/cvmfs/lhcb.cern.ch/lib/lcg/releases/gcc/8.2.0/x86_64-centos7/lib/gcc/x86_64-pc-linux-gnu/8.2.0/../../../../include/c++/8.2.0"]
-    flags += [b"-isystem", b"/cvmfs/lhcb.cern.ch/lib/lcg/releases/gcc/8.2.0/x86_64-centos7/lib/gcc/x86_64-pc-linux-gnu/8.2.0/../../../../include/c++/8.2.0/x86_64-pc-linux-gnu"]
-    flags += [b"-isystem", b"/cvmfs/lhcb.cern.ch/lib/lcg/releases/gcc/8.2.0/x86_64-centos7/lib/gcc/x86_64-pc-linux-gnu/8.2.0/../../../../include/c++/8.2.0/backward"]
+    # flags += [b"-isystem", b"/cvmfs/lhcb.cern.ch/lib/lcg/releases/gcc/8.2.0/x86_64-centos7/lib/gcc/x86_64-pc-linux-gnu/8.2.0/../../../../include/c++/8.2.0"]
+    # flags += [b"-isystem", b"/cvmfs/lhcb.cern.ch/lib/lcg/releases/gcc/8.2.0/x86_64-centos7/lib/gcc/x86_64-pc-linux-gnu/8.2.0/../../../../include/c++/8.2.0/x86_64-pc-linux-gnu"]
+    # flags += [b"-isystem", b"/cvmfs/lhcb.cern.ch/lib/lcg/releases/gcc/8.2.0/x86_64-centos7/lib/gcc/x86_64-pc-linux-gnu/8.2.0/../../../../include/c++/8.2.0/backward"]
+    # flags += [b"-isystem", b"/usr/local/include"]
+    # flags += [b"-isystem", b"/cvmfs/lhcb.cern.ch/lib/lcg/releases/clang/8.0.0/x86_64-centos7/lib/clang/8.0.0/include/"]
+    # # flags += [b"-isystem", b"/afs/cern.ch/user/p/pseyfert/.vim/os_dependent_bundle/YouCompleteMe/third_party/ycmd/clang_includes/include"]
+    # flags += [b"-isystem", b"/usr/include"]
+
+    # flags += [b"-x", b"c++"]
+
+    # ROBUSTA
+
+    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/8.3.0/../../../../include/c++/8.3.0"]
+    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/8.3.0/../../../../include/c++/8.3.0/x86_64-pc-linux-gnu"]
+    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/8.3.0/../../../../include/c++/8.3.0/backward"]
+
     flags += [b"-isystem", b"/usr/local/include"]
-    flags += [b"-isystem", b"/cvmfs/lhcb.cern.ch/lib/lcg/releases/clang/8.0.0/x86_64-centos7/lib/clang/8.0.0/include/"]
-    # flags += [b"-isystem", b"/afs/cern.ch/user/p/pseyfert/.vim/os_dependent_bundle/YouCompleteMe/third_party/ycmd/clang_includes/include"]
+    flags += [b"-isystem", b"/usr/share/vim/vimfiles/third_party/ycmd/third_party/clang/lib/clang/8.0.0/include"]
     flags += [b"-isystem", b"/usr/include"]
 
-    flags += [b"-x", b"c++"]
+    # flags += [b"-resource-dir=/usr/share/vim/vimfiles/third_party/ycmd/third_party/clang/lib/clang/8.0.0"]
 
+    # DONE
     return {"flags": flags, "do_cache": True}
