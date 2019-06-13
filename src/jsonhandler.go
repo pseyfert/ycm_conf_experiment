@@ -31,7 +31,7 @@ func GETDB(cpath *C.char) *C.char {
 		opts += k
 		opts += " "
 	}
-	optsadd, err := cc2ce.OptionsFromJsonByDB(json) // spacesep
+	optsadd, err := cc2ce.OptionsFromJsonByDB(json, true) // spacesep
 	if err != nil {
 		fmt.Printf("ERROR: %v\n", err)
 		return outconvert("")
@@ -50,7 +50,7 @@ func GETOPTS(cpath *C.char) *C.char {
 		fmt.Printf("ERROR: %v\n", err)
 		return outconvert("")
 	}
-	opts, err := cc2ce.OptionsFromJsonByDB(json) // spacesep
+	opts, err := cc2ce.OptionsFromJsonByDB(json, true) // spacesep
 	if err != nil {
 		fmt.Printf("ERROR: %v\n", err)
 		return outconvert("")

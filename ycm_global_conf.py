@@ -27,7 +27,7 @@ import time
 import ycm_core
 
 logger = logging.getLogger("conf_logger")
-logger.setLevel(logging.CRITICAL)
+logger.setLevel(logging.DEBUG)
 fh = logging.FileHandler("/tmp/ycmconflog.log")
 logger.addHandler(fh)
 
@@ -66,9 +66,13 @@ def add_cppflags(flags):
 
 def handleDB(dbpath, filename, refdir=None):
     compilation_info = GetCompilationInfoForFile(dbpath, filename)
+
     if not compilation_info:
+        logger.debug("trying generic handling")
         flags = GenericDB(dbpath, refdir)
+        logger.debug("before absolution: {}".format(flags))
         final_flags = MakeRelativePathsInFlagsAbsolute(flags, dbpath)
+        logger.debug("after absolution:  {}".format(final_flags))
     else:
         final_flags = MakeRelativePathsInFlagsAbsolute(
             compilation_info.compiler_flags_,
@@ -102,8 +106,14 @@ def GetCompilationInfoForFile(dbpath, filename):
     # for a corresponding source file, if any. If one exists, the flags for
     # that file should be good enough.
 
-    database = ycm_core.CompilationDatabase(dbpath)
+    logger.debug("parsing db from {}".format(dbpath))
+    logger.debug("for file        {}".format(filename))
+    try:
+        database = ycm_core.CompilationDatabase(dbpath)
+    except Exception as e:
+        logger.debug("couldn't open db: {}".format(e))
     if IsHeaderFile(filename):
+        logger.debug("looks like a header")
         basename = os.path.splitext(filename)[0]
         for extension in SOURCE_EXTENSIONS:
             replacement_file = basename + extension
@@ -112,52 +122,71 @@ def GetCompilationInfoForFile(dbpath, filename):
                     replacement_file)
                 if compilation_info.compiler_flags_:
                     return compilation_info
+        logger.debug("not found in DB")
         return None
-    return database.GetCompilationInfoForFile(filename)
+    logger.debug("looks like a source")
+    try:
+        retval = database.GetCompilationInfoForFile(filename)
+    except Exception as e:
+        logger.debug("couldn't read from db: {}".format(e))
+        return None
+
+    return retval
 
 
 def GenericDB(dbpath, refdir=None):
     import numpy.ctypeslib as npct
     import ctypes
-
-    lib = npct.load_library(
-        "py_cc2ce", os.path.join(os.path.dirname(
-            os.path.abspath(__file__)), "src")
-    )
-    fun_o = lib.GETOPTS(dbpath)
+    libdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "src")
+    logger.debug("loading go libs from {}".format(libdir))
+    lib = npct.load_library("py_cc2ce", libdir)
+    fun_o = lib.GETOPTS
     fun_o.restype = ctypes.c_char_p
     fun_o.argtypes = [ctypes.c_char_p]
-    retval = fun_o(dbpath.encode("utf-8"))
+    retval = fun_o(dbpath)
 
-    fun_i = lib.GETINCS(dbpath)
+    fun_i = lib.GETINCS
     fun_i.restype = ctypes.c_char_p
     fun_i.argtypes = [ctypes.c_char_p]
-    incdirs = fun_i(dbpath.encode("utf-8"))
+    incdirs = [x for x in fun_i(dbpath).split(b" ")]
 
-    for inc in incdirs.split(b" "):
+    for inc in incdirs:
+        if inc == b"":
+            continue
         if refdir is None:
-            retval += "-I" + inc
+            retval += b"-I" + inc + b" "
         else:
-            if os.path.relpath(inc, refdir)[0:2] == "..":
-                retval += "-isystem " + inc
+            juggel = os.path.relpath(inc, refdir)
+            if juggel[0:2] == "..":
+                retval += b"-isystem " + inc + b" "
             else:
-                retval += "-I" + inc
+                retval += b"-I" + inc + b" "
 
+    logger.debug("returning {}".format(retval))
     return retval.split(b" ")
 
 
 def MakeRelativePathsInFlagsAbsolute(flags, working_directory):
     if not working_directory:
+        logger.debug("skipping absolution")
         return list(flags)
+    logger.debug("doing absolution")
     new_flags = []
     make_next_absolute = False
-    path_flags = ["-isystem", "-I", "-iquote", "--sysroot="]
+    if type(flags[0]) == str:
+        logger.debug("dealing with strings")
+        path_flags = ["-isystem", "-I", "-iquote", "--sysroot="]
+        root = "/"
+    else:
+        logger.debug("dealing with bytes")
+        path_flags = [b"-isystem", b"-I", b"-iquote", b"--sysroot="]
+        root = b"/"
     for flag in flags:
         new_flag = flag
 
         if make_next_absolute:
             make_next_absolute = False
-            if not flag.startswith("/"):
+            if not flag.startswith(root):
                 new_flag = os.path.join(working_directory, flag)
 
         for path_flag in path_flags:
@@ -180,33 +209,39 @@ def FlagsForFile(filename):
         outpath = check_output(
             ["git", "rev-parse", "--git-dir"], cwd=os.path.dirname(filename)
         )
-        common = os.path.commonpath([outpath, filename.encode("utf-8")])
+        try:
+            common = os.path.commonpath([outpath, filename.encode("utf-8")])
+        except AttributeError:
+            common = os.path.commonprefix([outpath, filename.encode("utf-8")])
+            if not os.path.isdir(common):
+                common = os.path.dirname(common)
         logger.debug("git repository root at: {}".format(common))
         ccs = {
             os.stat(f)[stat.ST_MTIME]: f
             for f in glob.glob(os.path.join(
                 common,
-                "build.*",
-                "compile_commands.json"))
+                b"build.*",
+                b"compile_commands.json"))
         }
         logger.debug("found compile_commands.json at: {}".format(ccs))
         lhcbdb = ccs[max(ccs)]
         logger.debug("newest: {} from {}".format(lhcbdb, time.ctime(max(ccs))))
 
         flags = handleDB(os.path.dirname(lhcbdb), filename, common)
+        logger.debug("flags: {}".format(flags))
     except (CalledProcessError, ValueError) as e:
         flags = None
-        if e is ValueError:
+        if type(e) is ValueError:
             logger.debug("no usable LHCb build dir found")
             testbuild = os.path.join(common, "build")
             if os.path.isdir(testbuild) and os.path.exists(
-                os.path.join(testbuild, "compile_commands.json")
+                os.path.join(testbuild, b"compile_commands.json")
             ):
                 flags = handleDB(testbuild, filename, common)
             else:
-                testbuild = os.path.join(os.path.dirname(common), "build")
+                testbuild = os.path.join(os.path.dirname(common), b"build")
                 if os.path.isdir(testbuild) and os.path.exists(
-                    os.path.join(testbuild, "compile_commands.json")
+                    os.path.join(testbuild, b"compile_commands.json")
                 ):
                     flags = handleDB(testbuild, filename, common)
         else:
@@ -218,5 +253,29 @@ def FlagsForFile(filename):
             flags = add_cppflags(flags)
     else:
         pass
+
+    #  BODGING until it works ...
+
+    # flags += [b"--gcc-toolchain=/cvmfs/lhcb.cern.ch/lib/lcg/releases/gcc/8.2.0/x86_64-centos7"]
+    # flags += [b"-nostdinc"]
+
+    # flags += [b"-isystem", b"/cvmfs/lhcb.cern.ch/lib/lcg/releases/gcc/8.2.0/x86_64-centos7/lib/gcc/x86_64-pc-linux-gnu/8.2.0/../../../../include/c++/8.2.0"]
+    # flags += [b"-isystem", b"/cvmfs/lhcb.cern.ch/lib/lcg/releases/gcc/8.2.0/x86_64-centos7/lib/gcc/x86_64-pc-linux-gnu/8.2.0/../../../../include/c++/8.2.0/x86_64-pc-linux-gnu"]
+    # flags += [b"-isystem", b"/cvmfs/lhcb.cern.ch/lib/lcg/releases/gcc/8.2.0/x86_64-centos7/lib/gcc/x86_64-pc-linux-gnu/8.2.0/../../../../include/c++/8.2.0/backward"]
+
+    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/8.3.0/../../../../include/c++/8.3.0"]
+    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/8.3.0/../../../../include/c++/8.3.0/x86_64-pc-linux-gnu"]
+    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/8.3.0/../../../../include/c++/8.3.0/backward"]
+
+    # flags += [b"-isystem", b"/usr/local/include"]
+    # flags += [b"-isystem", b"/usr/lib/clang/8.0.0/include"]
+    # flags += [b"-isystem", b"/usr/include"]
+
+    flags += [b"-isystem", b"/usr/local/include"]
+    flags += [b"-isystem", b"/usr/share/vim/vimfiles/third_party/ycmd/third_party/clang/lib/clang/8.0.0/include"]
+    flags += [b"-isystem", b"/usr/include"]
+
+    # flags += [b"-resource-dir=/usr/share/vim/vimfiles/third_party/ycmd/third_party/clang/lib/clang/8.0.0"]
+
 
     return {"flags": flags, "do_cache": True}
