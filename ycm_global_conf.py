@@ -233,7 +233,7 @@ def FlagsForFile(filename):
         flags = None
         if type(e) is ValueError:
             logger.debug("no usable LHCb build dir found")
-            testbuild = os.path.join(common, "build")
+            testbuild = os.path.join(common, b"build")
             if os.path.isdir(testbuild) and os.path.exists(
                 os.path.join(testbuild, b"compile_commands.json")
             ):
