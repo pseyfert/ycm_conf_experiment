@@ -263,9 +263,13 @@ def FlagsForFile(filename):
     # flags += [b"-isystem", b"/cvmfs/lhcb.cern.ch/lib/lcg/releases/gcc/8.2.0/x86_64-centos7/lib/gcc/x86_64-pc-linux-gnu/8.2.0/../../../../include/c++/8.2.0/x86_64-pc-linux-gnu"]
     # flags += [b"-isystem", b"/cvmfs/lhcb.cern.ch/lib/lcg/releases/gcc/8.2.0/x86_64-centos7/lib/gcc/x86_64-pc-linux-gnu/8.2.0/../../../../include/c++/8.2.0/backward"]
 
-    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/8.3.0/../../../../include/c++/8.3.0"]
-    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/8.3.0/../../../../include/c++/8.3.0/x86_64-pc-linux-gnu"]
-    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/8.3.0/../../../../include/c++/8.3.0/backward"]
+    # flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/8.3.0/../../../../include/c++/8.3.0"]
+    # flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/8.3.0/../../../../include/c++/8.3.0/x86_64-pc-linux-gnu"]
+    # flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/8.3.0/../../../../include/c++/8.3.0/backward"]
+    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/9.1.0/../../../../include/c++/9.1.0"]
+    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/9.1.0/../../../../include/c++/9.1.0/x86_64-pc-linux-gnu"]
+    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/9.1.0/../../../../include/c++/9.1.0/backward"]
+
 
     # flags += [b"-isystem", b"/usr/local/include"]
     # flags += [b"-isystem", b"/usr/lib/clang/8.0.0/include"]
