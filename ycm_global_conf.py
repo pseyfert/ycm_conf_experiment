@@ -26,13 +26,13 @@ import stat
 import time
 import ycm_core
 
-import vim
-
 logger = logging.getLogger("conf_logger")
 logger.setLevel(logging.DEBUG)
 fh = logging.FileHandler("/tmp/ycmconflog.log")
 logger.addHandler(fh)
 
+# ycm conf is not used from vim directly!
+# import vim
 
 def default_flags():
     flags = ["-Wall", "-Werror", "-std=c++17", "-x", "c++", "-DYCM_DIAGS=1"]
@@ -230,7 +230,8 @@ def FlagsForFile(filename):
         logger.debug("newest: {} from {}".format(lhcbdb, time.ctime(max(ccs))))
 
         flags = handleDB(os.path.dirname(lhcbdb), filename, common)
-        vim.command("let &makeprg=\"ninja -C {}\"".format(os.path.dirname(lhcbdb)))
+        # see above, vim not available from ycm conf
+        # vim.command("let &makeprg=\"ninja -C {}\"".format(os.path.dirname(lhcbdb)))
         logger.debug("flags: {}".format(flags))
     except (CalledProcessError, ValueError) as e:
         flags = None
