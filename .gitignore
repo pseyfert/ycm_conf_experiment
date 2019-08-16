@@ -1,2 +1,3 @@
 src/py_cc2ce.h
 src/py_cc2ce.so
+__pycache__
