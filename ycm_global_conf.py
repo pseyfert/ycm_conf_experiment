@@ -26,6 +26,8 @@ import stat
 import time
 import ycm_core
 
+import vim
+
 logger = logging.getLogger("conf_logger")
 logger.setLevel(logging.DEBUG)
 fh = logging.FileHandler("/tmp/ycmconflog.log")
@@ -228,6 +230,7 @@ def FlagsForFile(filename):
         logger.debug("newest: {} from {}".format(lhcbdb, time.ctime(max(ccs))))
 
         flags = handleDB(os.path.dirname(lhcbdb), filename, common)
+        vim.command("let &makeprg=\"ninja -C {}\"".format(os.path.dirname(lhcbdb)))
         logger.debug("flags: {}".format(flags))
     except (CalledProcessError, ValueError) as e:
         flags = None
