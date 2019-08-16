@@ -20,11 +20,13 @@
 
 import os
 import logging
-from subprocess import check_output, CalledProcessError
-import glob
-import stat
-import time
 import ycm_core
+
+import imp
+
+lhcb = imp.load_source('lhcb', os.path.join(os.path.dirname(os.path.realpath(__file__)), 'ycm_conf_utils', 'lhcb.py'))
+# TODO port to importlib
+# import importlib
 
 logger = logging.getLogger("conf_logger")
 logger.setLevel(logging.DEBUG)
@@ -207,35 +209,16 @@ def MakeRelativePathsInFlagsAbsolute(flags, working_directory):
 
 
 def FlagsForFile(filename):
-    try:
-        outpath = check_output(
-            ["git", "rev-parse", "--git-dir"], cwd=os.path.dirname(filename)
-        )
-        try:
-            common = os.path.commonpath([outpath, filename.encode("utf-8")])
-        except AttributeError:
-            common = os.path.commonprefix([outpath, filename.encode("utf-8")])
-            if not os.path.isdir(common):
-                common = os.path.dirname(common)
-        logger.debug("git repository root at: {}".format(common))
-        ccs = {
-            os.stat(f)[stat.ST_MTIME]: f
-            for f in glob.glob(os.path.join(
-                common,
-                b"build.*",
-                b"compile_commands.json"))
-        }
-        logger.debug("found compile_commands.json at: {}".format(ccs))
-        lhcbdb = ccs[max(ccs)]
-        logger.debug("newest: {} from {}".format(lhcbdb, time.ctime(max(ccs))))
-
+    lhcbdb, common = lhcb.getdb(filename, logger)
+    if lhcbdb is not None:
         flags = handleDB(os.path.dirname(lhcbdb), filename, common)
         # see above, vim not available from ycm conf
+        # done now through ftplugin
         # vim.command("let &makeprg=\"ninja -C {}\"".format(os.path.dirname(lhcbdb)))
         logger.debug("flags: {}".format(flags))
-    except (CalledProcessError, ValueError) as e:
+    else:
         flags = None
-        if type(e) is ValueError:
+        if common is not None:
             logger.debug("no usable LHCb build dir found")
             testbuild = os.path.join(common, b"build")
             if os.path.isdir(testbuild) and os.path.exists(
@@ -255,8 +238,6 @@ def FlagsForFile(filename):
             flags = default_flags()
             flags = add_root(flags)
             flags = add_cppflags(flags)
-    else:
-        pass
 
     #  BODGING until it works ...
 
