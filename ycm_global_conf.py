@@ -24,8 +24,10 @@ import ycm_core
 
 import imp
 
+# https://stackoverflow.com/a/6683301
 lhcb = imp.load_source('lhcb', os.path.join(os.path.dirname(os.path.realpath(__file__)), 'ycm_conf_utils', 'lhcb.py'))
 # TODO port to importlib
+# https://stackoverflow.com/questions/19009932/import-arbitrary-python-source-file-python-3-3
 # import importlib
 
 logger = logging.getLogger("conf_logger")

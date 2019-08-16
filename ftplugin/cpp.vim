@@ -11,6 +11,7 @@ set cpo&vim
 let g:lhcb_ycm_util = expand('<sfile>:p:h:h') . '/ycm_conf_utils/lhcb.py'
 execute ':py3file ' . g:lhcb_ycm_util
 execute ':python3 import vim'
+" https://vim.fandom.com/wiki/Get_the_name_of_the_current_file
 execute ':python3 db, common = getdb("' . expand('%:p') . '", None)'
 execute ':python3 if db is not None: vim.command("let &makeprg=\"ninja -C {}\"".format(os.path.dirname(db).decode()))'
 
