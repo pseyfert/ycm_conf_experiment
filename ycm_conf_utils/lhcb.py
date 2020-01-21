@@ -47,9 +47,12 @@ def getdb(filename, logger=None):
         }
         if logger is not None:
             logger.debug("found compile_commands.json at: {}".format(ccs))
+        # if several compile_commands data bases are found, pick the newest:
+        # the dict is key'ed by MTIME.
         lhcbdb = ccs[max(ccs)]
         if logger is not None:
-            logger.debug("newest: {} from {}".format(lhcbdb, time.ctime(max(ccs))))
+            logger.debug("newest: {} from {}".format(
+                lhcbdb, time.ctime(max(ccs))))
     except (CalledProcessError, ValueError):
         try:
             return None, common
