@@ -145,7 +145,12 @@ def GenericDB(dbpath, refdir=None):
     import ctypes
     libdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "src")
     logger.debug("loading go libs from {}".format(libdir))
-    lib = npct.load_library("py_cc2ce", libdir)
+    try:
+        lib = npct.load_library("py_cc2ce", libdir)
+    except OSError:
+        logger.debug("didn't build the py_cc2ce.so library")
+        # FIXME: make a user visible error message
+        return None
     fun_o = lib.GETOPTS
     fun_o.restype = ctypes.c_char_p
     fun_o.argtypes = [ctypes.c_char_p]
@@ -173,6 +178,8 @@ def GenericDB(dbpath, refdir=None):
 
 
 def MakeRelativePathsInFlagsAbsolute(flags, working_directory):
+    if flags is None:
+        return None
     if not working_directory:
         logger.debug("skipping absolution")
         return list(flags)
@@ -236,10 +243,10 @@ def FlagsForFile(filename):
         else:
             logger.debug("not in a git repo")
 
-        if flags is None:
-            flags = default_flags()
-            flags = add_root(flags)
-            flags = add_cppflags(flags)
+    if flags is None:
+        flags = default_flags()
+        flags = add_root(flags)
+        flags = add_cppflags(flags)
 
     #  BODGING until it works ...
 
@@ -261,13 +268,13 @@ def FlagsForFile(filename):
     # flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/8.3.0/../../../../include/c++/8.3.0"]
     # flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/8.3.0/../../../../include/c++/8.3.0/x86_64-pc-linux-gnu"]
     # flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/8.3.0/../../../../include/c++/8.3.0/backward"]
-    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/9.1.0/../../../../include/c++/9.1.0"]
-    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/9.1.0/../../../../include/c++/9.1.0/x86_64-pc-linux-gnu"]
-    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/9.1.0/../../../../include/c++/9.1.0/backward"]
+    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/9.2.0/../../../../include/c++/9.2.0"]
+    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/9.2.0/../../../../include/c++/9.2.0/x86_64-pc-linux-gnu"]
+    flags += [b"-isystem", b"/usr/bin/../lib64/gcc/x86_64-pc-linux-gnu/9.2.0/../../../../include/c++/9.2.0/backward"]
 
 
     flags += [b"-isystem", b"/usr/local/include"]
-    flags += [b"-isystem", b"/usr/share/vim/vimfiles/third_party/ycmd/third_party/clang/lib/clang/8.0.0/include"]
+    flags += [b"-isystem", b"/usr/share/vim/vimfiles/third_party/ycmd/third_party/clang/lib/clang/9.0.0/include"]
     flags += [b"-isystem", b"/usr/include"]
 
     # flags += [b"-resource-dir=/usr/share/vim/vimfiles/third_party/ycmd/third_party/clang/lib/clang/8.0.0"]
