@@ -15,7 +15,7 @@ if has('python3')
   " https://vim.fandom.com/wiki/Get_the_name_of_the_current_file
   execute ':python3 db, common = getdb("' . expand('%:p') . '", None)'
   execute ':python3 if db is not None: vim.command("let &makeprg=\"ninja -C {}\"".format(os.path.dirname(db).decode()))'
-elseif has('python3')
+elseif has('python')
   execute ':pyfile ' . g:lhcb_ycm_util
   execute ':python import vim'
   " https://vim.fandom.com/wiki/Get_the_name_of_the_current_file
