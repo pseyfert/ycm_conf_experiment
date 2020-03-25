@@ -98,7 +98,7 @@ def getdb(filename, logger=None):
             if not os.path.isdir(common):
                 common = os.path.dirname(common)
         if logger is not None:
-            logger.debug("git repository root at: {}".format(common))
+            logger.debug("git repository root at: {0}".format(common))
         ccs = {}
         for f in glob.glob(os.path.join(
                 common,
@@ -106,12 +106,12 @@ def getdb(filename, logger=None):
                 b"compile_commands.json")):
             ccs[os.stat(f)[stat.ST_MTIME]] = f
         if logger is not None:
-            logger.debug("found compile_commands.json at: {}".format(ccs))
+            logger.debug("found compile_commands.json at: {0}".format(ccs))
         # if several compile_commands data bases are found, pick the newest:
         # the dict is key'ed by MTIME.
         lhcbdb = ccs[max(ccs)]
         if logger is not None:
-            logger.debug("newest: {} from {}".format(
+            logger.debug("newest: {0} from {1}".format(
                 lhcbdb, time.ctime(max(ccs))))
     except (CalledProcessError, ValueError):
         try:

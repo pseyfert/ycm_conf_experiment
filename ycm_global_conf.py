@@ -21,6 +21,7 @@
 import os
 import logging
 import ycm_core
+import tempfile
 
 import imp
 
@@ -32,7 +33,7 @@ lhcb = imp.load_source('lhcb', os.path.join(os.path.dirname(os.path.realpath(__f
 
 logger = logging.getLogger("conf_logger")
 logger.setLevel(logging.DEBUG)
-fh = logging.FileHandler("/tmp/ycmconflog.log")
+fh = logging.FileHandler(os.path.join(tempfile.gettempdir(), "ycmconflog.log"))
 logger.addHandler(fh)
 
 # ycm conf is not used from vim directly!
@@ -59,11 +60,11 @@ def add_root(flags):
 def add_cppflags(flags):
     try:
         envflags = os.environ["CPPFLAGS"].split(" ")
-        logger.info("envflags: {}".format(envflags))
+        logger.info("envflags: {0}".format(envflags))
         for envflag in envflags:
-            logger.debug("checking: {}".format(envflag))
+            logger.debug("checking: {0}".format(envflag))
             if envflag.startswith("-I"):
-                logger.debug("adding: {}".format(envflag))
+                logger.debug("adding: {0}".format(envflag))
                 flags += [envflag]
     except KeyError:
         pass
@@ -76,9 +77,9 @@ def handleDB(dbpath, filename, refdir=None):
     if not compilation_info:
         logger.debug("trying generic handling")
         flags = GenericDB(dbpath, refdir)
-        logger.debug("before absolution: {}".format(flags))
+        logger.debug("before absolution: {0}".format(flags))
         final_flags = MakeRelativePathsInFlagsAbsolute(flags, dbpath)
-        logger.debug("after absolution:  {}".format(final_flags))
+        logger.debug("after absolution:  {0}".format(final_flags))
     else:
         final_flags = MakeRelativePathsInFlagsAbsolute(
             compilation_info.compiler_flags_,
@@ -112,12 +113,12 @@ def GetCompilationInfoForFile(dbpath, filename):
     # for a corresponding source file, if any. If one exists, the flags for
     # that file should be good enough.
 
-    logger.debug("parsing db from {}".format(dbpath))
-    logger.debug("for file        {}".format(filename))
+    logger.debug("parsing db from {0}".format(dbpath))
+    logger.debug("for file        {0}".format(filename))
     try:
         database = ycm_core.CompilationDatabase(dbpath)
     except Exception as e:
-        logger.debug("couldn't open db: {}".format(e))
+        logger.debug("couldn't open db: {0}".format(e))
     if IsHeaderFile(filename):
         logger.debug("looks like a header")
         basename = os.path.splitext(filename)[0]
@@ -134,7 +135,7 @@ def GetCompilationInfoForFile(dbpath, filename):
     try:
         retval = database.GetCompilationInfoForFile(filename)
     except Exception as e:
-        logger.debug("couldn't read from db: {}".format(e))
+        logger.debug("couldn't read from db: {0}".format(e))
         return None
 
     return retval
@@ -144,7 +145,7 @@ def GenericDB(dbpath, refdir=None):
     import numpy.ctypeslib as npct
     import ctypes
     libdir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "src")
-    logger.debug("loading go libs from {}".format(libdir))
+    logger.debug("loading go libs from {0}".format(libdir))
     try:
         lib = npct.load_library("py_cc2ce", libdir)
     except OSError:
@@ -173,7 +174,7 @@ def GenericDB(dbpath, refdir=None):
             else:
                 retval += b"-I" + inc + b" "
 
-    logger.debug("returning {}".format(retval))
+    logger.debug("returning {0}".format(retval))
     return retval.split(b" ")
 
 
@@ -224,7 +225,7 @@ def FlagsForFile(filename):
         # see above, vim not available from ycm conf
         # done now through ftplugin
         # vim.command("let &makeprg=\"ninja -C {}\"".format(os.path.dirname(lhcbdb)))
-        logger.debug("flags: {}".format(flags))
+        logger.debug("flags: {0}".format(flags))
     else:
         flags = None
         if common is not None:
