@@ -20,7 +20,7 @@ elseif has('python')
   execute ':python import vim'
   " https://vim.fandom.com/wiki/Get_the_name_of_the_current_file
   execute ':python db, common = getdb("' . expand('%:p') . '", None)'
-  execute ':python if db is not None: vim.command("let &makeprg=\"ninja -C {}\"".format(os.path.dirname(db).decode()))'
+  execute ':python if db is not None: vim.command("let &makeprg=\"ninja -C {0}\"".format(os.path.dirname(db).decode()))'
 endif
 
 let &cpo = s:save_cpo
